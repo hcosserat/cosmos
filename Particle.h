@@ -13,12 +13,9 @@ public:
     Vector2<double> v; // velocity (px/s)
     Vector2<double> a; // acceleration (px/s^2)
     double m; // mass (kg)
-    std::vector<int> color; // color
 
     Particle(const Vector2<double> pos, const Vector2<double> v, const Vector2<double> a = {0, 0},
-              const double m = 1.0, const std::vector<int> color = {255, 255, 255}) : pos(pos), v(v), a(a), m(m),
-        color(color) {
-    }
+              const double m = 1.0) : pos(pos), v(v), a(a), m(m) { }
 
     void update(double dt);
 

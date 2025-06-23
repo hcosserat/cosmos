@@ -22,14 +22,13 @@ struct Astra {
     Cosmos *cosmos = nullptr;
     double m;
     std::vector<int> color;
+    std::vector<std::vector<int>> particle_colors;
 
     Astra(const char *title, const Vector2<int> &pos, const Vector2<int> &size, std::vector<int> color);
 
     ~Astra();
 
-    Vector2<double> get_other_star_pos(const Astra *other) const;
-
-    void draw_line_to_other(const Astra *other) const;
+    Vector2<int> get_other_star_pos(const Astra *other) const;
 
     void clear_window() const;
 
@@ -37,13 +36,13 @@ struct Astra {
 
     bool is_overlapping_with_other_window(const Astra *other) const;
 
-    Particle *new_particle(Vector2<double> v, Vector2<double> a, double m, std::vector<int> color);
+    Particle *new_particle(Vector2<double> v, Vector2<double> a, double m);
 
     void update_particles(double dt, const Astra *other) const;
 
     void create_new_particles(int count);
 
-    void draw_particles(const Astra *other) const;
+    void draw_particles(const Astra *astra_dest) const;
 
     void draw(const Astra *other) const;
 
@@ -53,7 +52,7 @@ struct Astra {
 
     Vector2<double> window_to_screen(const Vector2<double> &window_pos) const;
 
-    Vector2<double> screen_to_window(const Vector2<double> &screen_pos) const;
+    Vector2<int> screen_to_window(const Vector2<double> &screen_pos) const;
 
     Vector2<double> get_window_position() const;
 

@@ -9,14 +9,21 @@ Astra::Astra(const char *title, const Vector2<int> &pos, const Vector2<int> &siz
     m = ASTRA_MASS;
 
     constexpr int core_particles_count = 100;
-    for (int i = 0; i < core_particles_count; i++) {
+    int i;
+    for (i = 0; i < core_particles_count; i++) {
         const auto angle = random_double(0, 2 * M_PI);
         const auto magnitude = random_double(1, ASTRA_RADIUS / 5.0);
         const auto v = Vector2(magnitude * cos(angle), magnitude * sin(angle));
-        int r = color[0] + (255 - color[0]) * i / core_particles_count;
-        int g = color[1] + (255 - color[1]) * i / core_particles_count;
-        int b = color[2] + (255 - color[2]) * i / core_particles_count;
-        core_particles.push_back(new Particle(star, v, {0, 0}, 1, {r, g, b}));
+        core_particles.push_back(new Particle(star, v, {0, 0}, 1));
+    }
+
+    for (i = 0; i < 10; i++) {
+        const double factor = i / 9.0;
+        const auto r = static_cast<Uint8>(color[0] + (255 - color[0]) * factor);
+        const auto g = static_cast<Uint8>(color[1] + (255 - color[1]) * factor);
+        const auto b = static_cast<Uint8>(color[2] + (255 - color[2]) * factor);
+        std::vector<int> particle_color{r, g, b};
+        particle_colors.push_back(particle_color);
     }
 }
 
@@ -40,26 +47,20 @@ Vector2<double> Astra::window_to_screen(const Vector2<double> &window_pos) const
     return {window_pos.x + window_origin.x, window_pos.y + window_origin.y};
 }
 
-Vector2<double> Astra::screen_to_window(const Vector2<double> &screen_pos) const {
+Vector2<int> Astra::screen_to_window(const Vector2<double> &screen_pos) const {
     const Vector2<double> window_origin = get_window_position();
-    return {screen_pos.x - window_origin.x, screen_pos.y - window_origin.y};
+    return {
+        static_cast<int>(screen_pos.x - window_origin.x),
+        static_cast<int>(screen_pos.y - window_origin.y)
+    };
 }
 
 Vector2<double> Astra::get_star_screen_position() const {
     return window_to_screen(star);
 }
 
-Vector2<double> Astra::get_other_star_pos(const Astra *other) const {
-    const Vector2<double> other_screen_pos = other->get_star_screen_position();
-    return screen_to_window(other_screen_pos);
-}
-
-void Astra::draw_line_to_other(const Astra *other) const {
-    // Coordonnées de l'autre étoile dans notre référentiel
-    const Vector2<double> other_star_pos = get_other_star_pos(other);
-
-    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-    SDL_RenderDrawLine(renderer, star.x, star.y, other_star_pos.x, other_star_pos.y);
+Vector2<int> Astra::get_other_star_pos(const Astra *other) const {
+    return screen_to_window(other->get_star_screen_position());
 }
 
 void Astra::clear_window() const {
@@ -71,29 +72,97 @@ void Astra::render_present() const {
     SDL_RenderPresent(renderer);
 }
 
-void Astra::draw_particles(const Astra *other) const {
-    for (const auto p: particles) {
-        Vector2<double> window_pos = screen_to_window(p->pos);
-        SDL_SetRenderDrawColor(renderer, p->color[0], p->color[1], p->color[2], 255);
-        SDL_RenderDrawPoint(renderer, static_cast<int>(window_pos.x), static_cast<int>(window_pos.y));
+void Astra::draw_particles(const Astra *astra_dest) const {
+    const auto dest_renderer = astra_dest->renderer;
+
+    int color_index = 0;
+    const int max_colors = static_cast<int>(particle_colors.size());
+
+    std::vector<SDL_Point> points;
+    points.reserve(std::max(particles.size(), core_particles.size()));
+
+
+    // Particules libres
+    int same_color_particle_count = particles.size() / 6;
+    int same_color_index = same_color_particle_count;
+
+    if (color_index < max_colors) {
+        const auto &particle_color = particle_colors[color_index];
+        SDL_SetRenderDrawColor(dest_renderer, particle_color[0], particle_color[1], particle_color[2], 255);
     }
 
-    for (const auto p: core_particles) {
-        SDL_SetRenderDrawColor(renderer, p->color[0], p->color[1], p->color[2], 255);
-        SDL_RenderDrawPoint(renderer, static_cast<int>(p->pos.x), static_cast<int>(p->pos.y));
+    points.clear();
+
+    int i;
+
+    for (i = 0; i < particles.size(); i++) {
+        if (i == same_color_index && color_index < max_colors - 1) {
+            if (!points.empty()) {
+                SDL_RenderDrawPoints(dest_renderer, points.data(), static_cast<int>(points.size()));
+                points.clear();
+            }
+
+            color_index++;
+            const auto &particle_color = particle_colors[color_index];
+            SDL_SetRenderDrawColor(dest_renderer, particle_color[0], particle_color[1], particle_color[2], 255);
+            same_color_index += same_color_particle_count;
+        }
+
+        const auto p = particles[i];
+        const Vector2<int> window_pos = astra_dest->screen_to_window(p->pos);
+        points.push_back({window_pos.x, window_pos.y});
     }
 
-    for (const auto p: other->particles) {
-        const Vector2<double> window_pos = screen_to_window(p->pos);
-        SDL_SetRenderDrawColor(renderer, p->color[0], p->color[1], p->color[2], 255);
-        SDL_RenderDrawPoint(renderer, static_cast<int>(window_pos.x), static_cast<int>(window_pos.y));
+    if (!points.empty()) {
+        SDL_RenderDrawPoints(dest_renderer, points.data(), static_cast<int>(points.size()));
+        points.clear();
+    }
+
+
+    // Particules centrales
+    same_color_particle_count = core_particles.size() / 4;
+    same_color_index = same_color_particle_count;
+
+    if (color_index < max_colors) {
+        const auto &particle_color = particle_colors[color_index];
+        SDL_SetRenderDrawColor(dest_renderer, particle_color[0], particle_color[1], particle_color[2], 255);
+    }
+
+    for (i = 0; i < core_particles.size(); i++) {
+        if (i == same_color_index && color_index < max_colors - 1) {
+            if (!points.empty()) {
+                SDL_RenderDrawPoints(dest_renderer, points.data(), static_cast<int>(points.size()));
+                points.clear();
+            }
+
+            color_index++;
+            const auto &particle_color = particle_colors[color_index];
+            SDL_SetRenderDrawColor(dest_renderer, particle_color[0], particle_color[1], particle_color[2], 255);
+            same_color_index += same_color_particle_count;
+        }
+
+        const auto p = core_particles[i];
+
+        if (astra_dest == this) {
+            // on dessine nos particules centrales
+            points.push_back({static_cast<int>(p->pos.x), static_cast<int>(p->pos.y)});
+        } else {
+            // l'autre dessine nos particules centrales
+            const auto pos = astra_dest->screen_to_window(window_to_screen(p->pos));
+            points.push_back({pos.x, pos.y});
+        }
+    }
+
+    if (!points.empty()) {
+        SDL_RenderDrawPoints(dest_renderer, points.data(), static_cast<int>(points.size()));
     }
 }
 
 void Astra::draw(const Astra *other) const {
     clear_window();
 
-    draw_particles(other);
+    draw_particles(this); // draw my own particles on my own window
+    other->draw_particles(this); // draw the other's particles on my own window
 
     render_present();
 }
@@ -115,10 +184,9 @@ bool Astra::is_overlapping_with_other_window(const Astra *other) const {
     return true;
 }
 
-Particle *Astra::new_particle(Vector2<double> v, Vector2<double> a = {0, 0}, const double m = 1.0,
-                              const std::vector<int> color = {0, 255, 0}) {
+Particle *Astra::new_particle(const Vector2<double> v, const Vector2<double> a = {0, 0}, const double m = 1.0) {
     const Vector2<double> screen_pos = get_star_screen_position();
-    const auto p = new Particle(screen_pos, v, a, m, color);
+    const auto p = new Particle(screen_pos, v, a, m);
     particles.push_back(p);
     return p;
 }
@@ -148,7 +216,7 @@ void Astra::update_particles(const double dt, const Astra *other) const {
 
     for (const auto p: core_particles) {
         p->update_a_fall(m * 1.0e-6, star + noise);
-        p->update(dt * 10.0);  // simule des particules plus rapides
+        p->update(dt * 10.0); // simule des particules plus rapides
     }
 }
 
@@ -157,9 +225,7 @@ void Astra::create_new_particles(const int count) {
         const auto angle = random_double(0, 2 * M_PI);
         const auto magnitude = random_double(1, ASTRA_RADIUS / 2.0);
         const auto v = Vector2(magnitude * cos(angle), magnitude * sin(angle));
-        auto p = new_particle(v);
-        int color_shift = static_cast<int>(magnitude * 2.0);
-        p->color = {color[0] * color_shift / 100, color[1] * color_shift / 100, color[2] * color_shift / 100};
+        new_particle(v);
     }
 }
 
