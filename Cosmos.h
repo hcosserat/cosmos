@@ -5,15 +5,15 @@
 #ifndef COSMOS_H
 #define COSMOS_H
 
-#include <list>
+#include <vector>
 #include "Astra.h"
 #include "Vector2.h"
 
 class Cosmos {
-    std::list<Astra *> astras;
+    std::vector<Astra *> astras;
 
 public:
-    explicit Cosmos(int windows_count = 2, Vector2<int> windows_size = Vector2(500, 500));
+    explicit Cosmos(Vector2<int> windows_size = Vector2(500, 500));
 
     ~Cosmos();
 

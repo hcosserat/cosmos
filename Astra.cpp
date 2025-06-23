@@ -106,7 +106,7 @@ bool Astra::is_overlapping_with_other_window(const Astra *other) const {
 }
 
 Particle *Astra::new_particle(Vector2<double> v, Vector2<double> a = {0, 0}, const double m = 1.0,
-                                const std::vector<int> color = {0, 255, 0}) {
+                              const std::vector<int> color = {0, 255, 0}) {
     // Create particle at star's screen position
     const Vector2<double> screen_pos = get_star_screen_position();
     const auto p = new Particle(screen_pos, v, a, m, color);
@@ -132,9 +132,9 @@ void Astra::update_particles(const double dt, const Astra *other) const {
             const double dist2 = other_star_screen_pos.dist2(&p->pos);
 
             if (dist2 >= ASTRA_RADIUS * ASTRA_RADIUS)
-            p->update_a_gravity(other_star_screen_pos, other->m);
+                p->update_a_gravity(other_star_screen_pos, other->m);
             else
-            p->update_a_gravity(this_star_screen_pos, m);
+                p->update_a_gravity(this_star_screen_pos, m);
         } else {
             p->update_a_fall(m * 1.0e-6, this_star_screen_pos);
         }
@@ -165,12 +165,19 @@ void Astra::delete_distant_particles() {
     SDL_GetWindowSize(window, &w, nullptr);
     const double range = w * w * 4;
 
-    // Get star's screen position for distance calculation
     Vector2<double> star_screen_pos = get_star_screen_position();
 
-    particles.remove_if([&star_screen_pos, range](const Particle *p) {
-        const double dx = p->pos.x - star_screen_pos.x;
-        const double dy = p->pos.y - star_screen_pos.y;
-        return dx * dx + dy * dy > range;
-    });
+    const auto it = std::ranges::remove_if(
+        particles,
+        [&star_screen_pos, range](const Particle *p) {
+            const double dx = p->pos.x - star_screen_pos.x;
+            const double dy = p->pos.y - star_screen_pos.y;
+            const bool should_remove = dx * dx + dy * dy > range;
+            if (should_remove) {
+                delete p;
+            }
+            return should_remove;
+        }).begin();
+
+    particles.erase(it, particles.end());
 }

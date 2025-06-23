@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
 
     constexpr int fps = 60;
     constexpr double dt = 1.0 / fps;
-    const auto cosmos = new Cosmos(2);
+    const auto cosmos = new Cosmos();
     bool quit = false;
 
     // Event handler

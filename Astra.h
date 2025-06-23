@@ -2,7 +2,7 @@
 #define WINDOW_H
 
 #include <SDL2/SDL.h>
-#include <list>
+#include <vector>
 
 #include "Particle.h"
 #include "Vector2.h"
@@ -16,7 +16,7 @@ class Cosmos;
 struct Astra {
     SDL_Window *window;
     SDL_Renderer *renderer;
-    std::list<Particle *> particles;
+    std::vector<Particle *> particles;
     Vector2<double> star;
     Cosmos *cosmos = nullptr;
     double m;
