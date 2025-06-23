@@ -17,6 +17,7 @@ struct Astra {
     SDL_Window *window;
     SDL_Renderer *renderer;
     std::vector<Particle *> particles;
+    std::vector<Particle *> core_particles; // particules qui ne quitteront pas le centre, coordonnées locales
     Vector2<double> star;
     Cosmos *cosmos = nullptr;
     double m;
@@ -50,10 +51,12 @@ struct Astra {
 
     void delete_distant_particles();
 
-    // New methods for coordinate conversion
-    Vector2<double> window_to_screen(const Vector2<double>& window_pos) const;
-    Vector2<double> screen_to_window(const Vector2<double>& screen_pos) const;
+    Vector2<double> window_to_screen(const Vector2<double> &window_pos) const;
+
+    Vector2<double> screen_to_window(const Vector2<double> &screen_pos) const;
+
     Vector2<double> get_window_position() const;
+
     Vector2<double> get_star_screen_position() const;
 };
 

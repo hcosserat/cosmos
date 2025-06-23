@@ -4,11 +4,11 @@
 
 int main(int argc, char *argv[]) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
+        std::cerr << "SDL could not initialize >< ! Error : " << SDL_GetError() << std::endl;
         return 1;
     }
 
-    constexpr int fps = 60;
+    constexpr int fps = 30;
     constexpr double dt = 1.0 / fps;
     const auto cosmos = new Cosmos();
     bool quit = false;

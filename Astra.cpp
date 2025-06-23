@@ -7,6 +7,17 @@ Astra::Astra(const char *title, const Vector2<int> &pos, const Vector2<int> &siz
     window = SDL_CreateWindow(title, pos.x, pos.y, size.x, size.y, SDL_WINDOW_SHOWN);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     m = ASTRA_MASS;
+
+    constexpr int core_particles_count = 100;
+    for (int i = 0; i < core_particles_count; i++) {
+        const auto angle = random_double(0, 2 * M_PI);
+        const auto magnitude = random_double(1, ASTRA_RADIUS / 5.0);
+        const auto v = Vector2(magnitude * cos(angle), magnitude * sin(angle));
+        int r = color[0] + (255 - color[0]) * i / core_particles_count;
+        int g = color[1] + (255 - color[1]) * i / core_particles_count;
+        int b = color[2] + (255 - color[2]) * i / core_particles_count;
+        core_particles.push_back(new Particle(star, v, {0, 0}, 1, {r, g, b}));
+    }
 }
 
 Astra::~Astra() {
@@ -25,12 +36,12 @@ Vector2<double> Astra::get_window_position() const {
 }
 
 Vector2<double> Astra::window_to_screen(const Vector2<double> &window_pos) const {
-    Vector2<double> window_origin = get_window_position();
+    const Vector2<double> window_origin = get_window_position();
     return {window_pos.x + window_origin.x, window_pos.y + window_origin.y};
 }
 
 Vector2<double> Astra::screen_to_window(const Vector2<double> &screen_pos) const {
-    Vector2<double> window_origin = get_window_position();
+    const Vector2<double> window_origin = get_window_position();
     return {screen_pos.x - window_origin.x, screen_pos.y - window_origin.y};
 }
 
@@ -39,9 +50,7 @@ Vector2<double> Astra::get_star_screen_position() const {
 }
 
 Vector2<double> Astra::get_other_star_pos(const Astra *other) const {
-    // Get the screen position of the other star
-    Vector2<double> other_screen_pos = other->get_star_screen_position();
-    // Convert to this window's coordinates
+    const Vector2<double> other_screen_pos = other->get_star_screen_position();
     return screen_to_window(other_screen_pos);
 }
 
@@ -63,18 +72,19 @@ void Astra::render_present() const {
 }
 
 void Astra::draw_particles(const Astra *other) const {
-    // Draw own particles
     for (const auto p: particles) {
-        // Convert particle's screen position to window coordinates
         Vector2<double> window_pos = screen_to_window(p->pos);
         SDL_SetRenderDrawColor(renderer, p->color[0], p->color[1], p->color[2], 255);
         SDL_RenderDrawPoint(renderer, static_cast<int>(window_pos.x), static_cast<int>(window_pos.y));
     }
 
-    // Draw other window's particles
+    for (const auto p: core_particles) {
+        SDL_SetRenderDrawColor(renderer, p->color[0], p->color[1], p->color[2], 255);
+        SDL_RenderDrawPoint(renderer, static_cast<int>(p->pos.x), static_cast<int>(p->pos.y));
+    }
+
     for (const auto p: other->particles) {
-        // Convert particle's screen position to window coordinates
-        Vector2<double> window_pos = screen_to_window(p->pos);
+        const Vector2<double> window_pos = screen_to_window(p->pos);
         SDL_SetRenderDrawColor(renderer, p->color[0], p->color[1], p->color[2], 255);
         SDL_RenderDrawPoint(renderer, static_cast<int>(window_pos.x), static_cast<int>(window_pos.y));
     }
@@ -107,7 +117,6 @@ bool Astra::is_overlapping_with_other_window(const Astra *other) const {
 
 Particle *Astra::new_particle(Vector2<double> v, Vector2<double> a = {0, 0}, const double m = 1.0,
                               const std::vector<int> color = {0, 255, 0}) {
-    // Create particle at star's screen position
     const Vector2<double> screen_pos = get_star_screen_position();
     const auto p = new Particle(screen_pos, v, a, m, color);
     particles.push_back(p);
@@ -115,19 +124,15 @@ Particle *Astra::new_particle(Vector2<double> v, Vector2<double> a = {0, 0}, con
 }
 
 void Astra::update_particles(const double dt, const Astra *other) const {
+    const Vector2<double> this_star_screen_pos = get_star_screen_position();
+    const auto noise = Vector2(
+        random_double(-ASTRA_RADIUS / 10.0, ASTRA_RADIUS / 10.0),
+        random_double(-ASTRA_RADIUS / 10.0, ASTRA_RADIUS / 10.0)
+    );
+
     for (const auto p: particles) {
-        p->update(dt);
-
-        // Get the screen positions of stars for gravity calculations
-        Vector2<double> this_star_screen_pos = get_star_screen_position();
-        Vector2<double> other_star_screen_pos = other->get_star_screen_position();
-
         if (is_overlapping_with_other_window(other)) {
-            const auto other_star_screen_pos_noise = Vector2(
-                random_double(-ASTRA_RADIUS / 5.0, ASTRA_RADIUS / 5.0),
-                random_double(-ASTRA_RADIUS / 5.0, ASTRA_RADIUS / 5.0)
-            );
-            other_star_screen_pos += other_star_screen_pos_noise;
+            Vector2<double> other_star_screen_pos = other->get_star_screen_position() + noise * 2;
 
             const double dist2 = other_star_screen_pos.dist2(&p->pos);
 
@@ -138,11 +143,16 @@ void Astra::update_particles(const double dt, const Astra *other) const {
         } else {
             p->update_a_fall(m * 1.0e-6, this_star_screen_pos);
         }
+        p->update(dt);
+    }
+
+    for (const auto p: core_particles) {
+        p->update_a_fall(m * 1.0e-6, star + noise);
+        p->update(dt * 10.0);  // simule des particules plus rapides
     }
 }
 
 void Astra::create_new_particles(const int count) {
-    // Rest of the function remains unchanged
     for (int i = 0; i < count; i++) {
         const auto angle = random_double(0, 2 * M_PI);
         const auto magnitude = random_double(1, ASTRA_RADIUS / 2.0);

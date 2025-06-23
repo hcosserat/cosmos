@@ -16,7 +16,7 @@ public:
     std::vector<int> color; // color
 
     Particle(const Vector2<double> pos, const Vector2<double> v, const Vector2<double> a = {0, 0},
-              const double m = 1.0, const std::vector<int> color = {0, 255, 0}) : pos(pos), v(v), a(a), m(m),
+              const double m = 1.0, const std::vector<int> color = {255, 255, 255}) : pos(pos), v(v), a(a), m(m),
         color(color) {
     }
 

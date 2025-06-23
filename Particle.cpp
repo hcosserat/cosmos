@@ -45,7 +45,7 @@ void Particle::update_a_fall(double k, const Vector2<double> direction) {
     const double dx = direction.x - pos.x;
     const double dy = direction.y - pos.y;
     const double d = sqrt(dx * dx + dy * dy);
-    k = k / d;
+    k = d > 10 ? k / d : 0;
 
     this->a.x = k * dx;
     this->a.y = k * dy;
