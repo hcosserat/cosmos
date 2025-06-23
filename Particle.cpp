@@ -2,11 +2,11 @@
 // Created by Hippolyte Cosserat on 20/06/2025.
 //
 
-#include "Particule.h"
+#include "Particle.h"
 
 #define G 1
 
-void Particule::update(const double dt) {
+void Particle::update(const double dt) {
     v += dt * a;
 
     constexpr double max_speed = 200;
@@ -20,7 +20,7 @@ void Particule::update(const double dt) {
     pos += dt * v;
 }
 
-void Particule::update_a(const Vector2<double> other_pos, const double other_m) {
+void Particle::update_a_gravity(const Vector2<double> other_pos, const double other_m) {
     // m * a = G * m * other_m / d^2
     // => a = G * other_m / d^2
     // => â = G * other_m / d^2 * ^d/d
@@ -28,7 +28,7 @@ void Particule::update_a(const Vector2<double> other_pos, const double other_m) 
     const double dy = other_pos.y - pos.y;
     const double d2 = dx * dx + dy * dy;
 
-    if (d2 < 500) {
+    if (d2 < 100) {
         this->a.x = 0;
         this->a.y = 0;
         return;
@@ -36,6 +36,17 @@ void Particule::update_a(const Vector2<double> other_pos, const double other_m) 
 
     const double d = sqrt(d2);
     const double k = G * other_m / (d2 * d);
+    this->a.x = k * dx;
+    this->a.y = k * dy;
+}
+
+void Particle::update_a_fall(double k, const Vector2<double> direction) {
+    // â = k * ^d
+    const double dx = direction.x - pos.x;
+    const double dy = direction.y - pos.y;
+    const double d = sqrt(dx * dx + dy * dy);
+    k = k / d;
+
     this->a.x = k * dx;
     this->a.y = k * dy;
 }

@@ -8,8 +8,8 @@ add_executable(cosmo main.cpp
         Cosmos.cpp
         Cosmos.h
         Astra.cpp
-        Particule.cpp
-        Particule.h
+        Particle.cpp
+        Particle.h
         random.cpp
         random.h)
 

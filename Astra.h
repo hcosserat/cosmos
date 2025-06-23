@@ -4,22 +4,25 @@
 #include <SDL2/SDL.h>
 #include <list>
 
-#include "Particule.h"
+#include "Particle.h"
 #include "Vector2.h"
 #include "random.h"
+
+#define ASTRA_RADIUS 100  // px
+#define ASTRA_MASS 1.0e7  // kg
 
 class Cosmos;
 
 struct Astra {
     SDL_Window *window;
     SDL_Renderer *renderer;
-    std::list<Particule *> particules;
+    std::list<Particle *> particles;
     Vector2<double> star;
     Cosmos *cosmos = nullptr;
     double m;
     std::vector<int> color;
 
-    Astra(const char *title, const Vector2<int> &pos, const Vector2<int> &size, const std::vector<int> color);
+    Astra(const char *title, const Vector2<int> &pos, const Vector2<int> &size, std::vector<int> color);
 
     ~Astra();
 
@@ -33,19 +36,25 @@ struct Astra {
 
     bool is_overlapping_with_other_window(const Astra *other) const;
 
-    Particule *new_particule(Vector2<double> v, Vector2<double> a, double m, std::vector<int> color);
+    Particle *new_particle(Vector2<double> v, Vector2<double> a, double m, std::vector<int> color);
 
-    void update_particules(double dt, const Astra *other) const;
+    void update_particles(double dt, const Astra *other) const;
 
-    void create_new_particules(int count);
+    void create_new_particles(int count);
 
-    void draw_particules(const Astra *other) const;
+    void draw_particles(const Astra *other) const;
 
     void draw(const Astra *other) const;
 
-    void update(double dt, double p_creation_rate, Astra *other);
+    void update(double dt, double p_creation_rate, const Astra *other);
 
-    void delete_distant_particules();
+    void delete_distant_particles();
+
+    // New methods for coordinate conversion
+    Vector2<double> window_to_screen(const Vector2<double>& window_pos) const;
+    Vector2<double> screen_to_window(const Vector2<double>& screen_pos) const;
+    Vector2<double> get_window_position() const;
+    Vector2<double> get_star_screen_position() const;
 };
 
 #endif //WINDOW_H
