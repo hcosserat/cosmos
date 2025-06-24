@@ -10,9 +10,10 @@ Astra::Astra(const char *title, const Vector2<int> &pos, const Vector2<int> &siz
 
     constexpr int core_particles_count = 100;
     int i;
+
     for (i = 0; i < core_particles_count; i++) {
         const auto angle = random_double(0, 2 * M_PI);
-        const auto magnitude = random_double(1, ASTRA_RADIUS / 5.0);
+        const auto magnitude = random_double(1, ASTRA_RADIUS / 8.0);
         const auto v = Vector2(magnitude * cos(angle), magnitude * sin(angle));
         core_particles.push_back(new Particle(star, v, {0, 0}, 1));
     }

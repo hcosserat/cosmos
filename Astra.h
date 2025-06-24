@@ -22,7 +22,7 @@ struct Astra {
     Cosmos *cosmos = nullptr;
     double m;
     std::vector<int> color;
-    std::vector<std::vector<int>> particle_colors;
+    std::vector<std::vector<int> > particle_colors;
 
     Astra(const char *title, const Vector2<int> &pos, const Vector2<int> &size, std::vector<int> color);
 

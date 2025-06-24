@@ -15,7 +15,8 @@ public:
     double m; // mass (kg)
 
     Particle(const Vector2<double> pos, const Vector2<double> v, const Vector2<double> a = {0, 0},
-              const double m = 1.0) : pos(pos), v(v), a(a), m(m) { }
+             const double m = 1.0) : pos(pos), v(v), a(a), m(m) {
+    }
 
     void update(double dt);
 
