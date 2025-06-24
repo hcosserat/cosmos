@@ -223,6 +223,21 @@ void Astra::update_particles(const double dt, const Astra *other) const {
 
 void Astra::create_new_particles(const int count) {
     for (int i = 0; i < count; i++) {
+        // If we've reached the maximum number of particles, remove the oldest ones
+        if (particles.size() >= MAX_PARTICLES) {
+            // Calculate how many particles need to be removed
+            size_t to_remove = 1; // At minimum, remove one to make space
+
+            // Delete the oldest particles (which are at the beginning of the vector)
+            for (size_t j = 0; j < to_remove && !particles.empty(); j++) {
+                delete particles[j]; // Free the memory
+            }
+
+            // Remove the pointers from the vector
+            particles.erase(particles.begin(), particles.begin() + std::min(to_remove, particles.size()));
+        }
+
+        // Create the new particle
         const auto angle = random_double(0, 2 * M_PI);
         const auto magnitude = random_double(1, ASTRA_RADIUS / 2.0);
         const auto v = Vector2(magnitude * cos(angle), magnitude * sin(angle));

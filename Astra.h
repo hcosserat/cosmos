@@ -10,6 +10,7 @@
 
 #define ASTRA_RADIUS 100  // px
 #define ASTRA_MASS 1.0e7  // kg
+#define MAX_PARTICLES 10000
 
 class Cosmos;
 
