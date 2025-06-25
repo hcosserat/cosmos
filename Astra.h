@@ -13,6 +13,7 @@
 #define MAX_PARTICLES 10000
 
 class Cosmos;
+class Particle;
 
 struct Astra {
     SDL_Window *window;
@@ -48,8 +49,6 @@ struct Astra {
     void draw(const Astra *other) const;
 
     void update(double dt, double p_creation_rate, const Astra *other);
-
-    void delete_distant_particles();
 
     Vector2<double> window_to_screen(const Vector2<double> &window_pos) const;
 

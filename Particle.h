@@ -6,6 +6,9 @@
 #define PARTICLE_H
 
 #include "Vector2.h"
+#include "Astra.h"
+
+struct Astra;
 
 class Particle {
 public:
@@ -20,7 +23,7 @@ public:
 
     void update(double dt);
 
-    void update_a_gravity(Vector2<double> other_pos, double other_m);
+    void update_a_gravity(Vector2<double> source_pos, Vector2<double> dest_pos, double dest_m, double lin_factor = 0);
 
     void update_a_fall(double k, Vector2<double> direction);
 };

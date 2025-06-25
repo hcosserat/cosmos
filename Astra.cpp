@@ -203,12 +203,10 @@ void Astra::update_particles(const double dt, const Astra *other) const {
         if (is_overlapping_with_other_window(other)) {
             Vector2<double> other_star_screen_pos = other->get_star_screen_position() + noise * 2;
 
-            const double dist2 = other_star_screen_pos.dist2(&p->pos);
-
-            if (dist2 >= ASTRA_RADIUS * ASTRA_RADIUS)
-                p->update_a_gravity(other_star_screen_pos, other->m);
+            if (other_star_screen_pos.dist2(&p->pos) >= ASTRA_RADIUS * ASTRA_RADIUS)
+                p->update_a_gravity(this_star_screen_pos, other_star_screen_pos, other->m, 1);
             else
-                p->update_a_gravity(this_star_screen_pos, m);
+                p->update_a_gravity(other_star_screen_pos, this_star_screen_pos, this->m);
         } else {
             p->update_a_fall(m * 1.0e-6, this_star_screen_pos);
         }
@@ -249,27 +247,4 @@ void Astra::update(const double dt, const double p_creation_rate, const Astra *o
     const int new_particles_count = p_creation_rate * dt;
     create_new_particles(new_particles_count);
     update_particles(dt, other);
-    delete_distant_particles();
-}
-
-void Astra::delete_distant_particles() {
-    int w;
-    SDL_GetWindowSize(window, &w, nullptr);
-    const double range = w * w * 4;
-
-    Vector2<double> star_screen_pos = get_star_screen_position();
-
-    const auto it = std::ranges::remove_if(
-        particles,
-        [&star_screen_pos, range](const Particle *p) {
-            const double dx = p->pos.x - star_screen_pos.x;
-            const double dy = p->pos.y - star_screen_pos.y;
-            const bool should_remove = dx * dx + dy * dy > range;
-            if (should_remove) {
-                delete p;
-            }
-            return should_remove;
-        }).begin();
-
-    particles.erase(it, particles.end());
 }

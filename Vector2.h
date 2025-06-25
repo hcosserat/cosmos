@@ -73,7 +73,7 @@ public:
         throw std::out_of_range("Vector2 index out of range");
     }
 
-    T dist2(const Vector2<T> *other) {
+    T dist2(const Vector2<T> *other) const {
         const T dx = other->x - x;
         const T dy = other->y - y;
         return dx * dx + dy * dy;
