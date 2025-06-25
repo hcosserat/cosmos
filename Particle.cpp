@@ -34,7 +34,7 @@ void Particle::update_a_gravity(const Vector2<double> source_pos, const Vector2<
      *   \
      *     s
      *
-     * â = z * ^ds - ^p  avec z = ^p•^ds / ||ds||^2  (projection orthogonale)
+     * â = z * ^sd - ^sp  avec z = ^sp•^sd / ||sd||^2  (projection orthogonale)
      *
      */
     // Force gravitationnelle
@@ -54,22 +54,54 @@ void Particle::update_a_gravity(const Vector2<double> source_pos, const Vector2<
     const double f_g_y = k * dy;
 
     // Force linéaire
-    const double dsx = dest_pos.x - source_pos.x;
-    const double dsy = dest_pos.y - source_pos.y;
-    const double ds2 = dsx * dsx + dsy * dsy;
-    if (ds2 < 100) {
+    const double sdx = dest_pos.x - source_pos.x;
+    const double sdy = dest_pos.y - source_pos.y;
+    const double sd2 = sdx * sdx + sdy * sdy;
+
+    if (sd2 < 100) {
+        // Deux astres trop proches, pas de force linéaire
         this->a.x = f_g_x;
         this->a.y = f_g_y;
         return;
     }
-    const double px = pos.x - source_pos.x;
-    const double py = pos.y - source_pos.y;
-    const double z = (px * dsx + py * dsy) / ds2;
-    const double f_l_x = z * dsx - px;
-    const double f_l_y = z * dsy - py;
-    const double r = 1 - sqrt((px * px + py * py) / ds2); // avancement du trajet
-    const double anti_lin_factor = 4 * (r - 0.5) * (r - 0.5); // force linéaire max à la moitié du trajet,
-    lin_factor *= std::max(1 - anti_lin_factor, 0.0); //    et nulle au départ et à l'arrivée
+
+    const double spx = pos.x - source_pos.x;
+    const double spy = pos.y - source_pos.y;
+    const double sp_dot_sd = spx * sdx + spy * sdy;
+    const double z = sp_dot_sd / sd2;
+    const double f_l_x = z * sdx - spx;
+    const double f_l_y = z * sdy - spy;
+    const double sp2 = spx * spx + spy * spy;
+
+    if (sp2 < 100) {
+        // Particule trop proche de la source, pas de force linéaire
+        this->a.x = f_g_x;
+        this->a.y = f_g_y;
+        return;
+    }
+
+    const double sp = sqrt(sp2);
+    const double sd = sqrt(sd2);
+    const double cos_sp_sd = sp_dot_sd / (sp * sd);
+    const double r = sp / sd; // avancement du trajet
+
+    if (cos_sp_sd < 0.05 || (cos_sp_sd > 0.95 && r < 0.6) || r <= 0 || r >= 1) {
+        // Particule presque "derrière" la source
+        // ou déjà proche de sd
+        // ou derrière la destination, pas de force linéaire
+        this->a.x = f_g_x;
+        this->a.y = f_g_y;
+        return;
+    }
+
+    const double dist_lin_factor =
+            r < 0.5
+                ? (0.5 + (10 - 14 * r) * r) * r
+                : r < 0.75
+                      ? -55 + (288 + (-480 + 256 * r) * r) * r
+                      : 84.5 + (-304.5 + (356 - 136 * r) * r) * r;
+
+    lin_factor *= dist_lin_factor;
 
     this->a.x = lin_factor * (f_l_x - f_g_x) + f_g_x;
     this->a.y = lin_factor * (f_l_y - f_g_y) + f_g_y;

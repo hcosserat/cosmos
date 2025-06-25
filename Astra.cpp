@@ -204,7 +204,7 @@ void Astra::update_particles(const double dt, const Astra *other) const {
             Vector2<double> other_star_screen_pos = other->get_star_screen_position() + noise * 2;
 
             if (other_star_screen_pos.dist2(&p->pos) >= ASTRA_RADIUS * ASTRA_RADIUS)
-                p->update_a_gravity(this_star_screen_pos, other_star_screen_pos, other->m, 1);
+                p->update_a_gravity(this_star_screen_pos, other_star_screen_pos, other->m, 0.5);
             else
                 p->update_a_gravity(other_star_screen_pos, this_star_screen_pos, this->m);
         } else {
