@@ -21,7 +21,6 @@ struct Astra {
     std::vector<Particle *> particles;
     std::vector<Particle *> core_particles; // particules qui ne quitteront pas le centre, coordonnées locales
     Vector2<double> star;
-    Cosmos *cosmos = nullptr;
     double m;
     std::vector<int> color;
     std::vector<std::vector<int> > particle_colors;

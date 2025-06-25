@@ -11,30 +11,29 @@ Cosmos::Cosmos(const Vector2<int> windows_size) {
     SDL_DisplayMode DM;
     SDL_GetCurrentDisplayMode(0, &DM);
 
-    const int centerx = DM.w / 2 - windows_size.x / 2;
-    const int centery = DM.h / 2 - windows_size.y / 2;
+    const auto center = Vector2(DM.w - windows_size.x, DM.h - windows_size.y) / 2;
 
-    const double dist_from_center = DM.h / 2.0;
+    const auto right_shift = Vector2(DM.w / 4, 0);
+    const auto up_shift = Vector2(0, DM.h / 8);
 
-    for (int i = 0; i < 2; i++) {
-        constexpr double angle_shift = 0.8;
-        const double pos_angle = i * M_PI + angle_shift;
-        const int x = centerx + dist_from_center * cos(pos_angle);
-        const int y = centery + dist_from_center * sin(pos_angle);
+    const std::vector green{0, 255, 0};
+    const std::vector pink{255, 4, 191};
 
-        std::vector green{0, 255, 0};
-        std::vector pink{255, 4, 191};
+    const auto astra_green = new Astra(
+        "Emerald",
+        center + right_shift - up_shift,
+        Vector2(windows_size.x, windows_size.y),
+        green
+    );
+    const auto astra_pink = new Astra(
+        "Magenta",
+        center - right_shift + up_shift,
+        Vector2(windows_size.x, windows_size.y),
+        pink
+    );
 
-        const auto astra = new Astra(
-            std::to_string(i).c_str(),
-            Vector2(x, y),
-            Vector2(windows_size.x, windows_size.y),
-            i == 0 ? green : pink
-        );
-
-        astra->cosmos = this;
-        astras.push_back(astra);
-    }
+    astras.push_back(astra_green);
+    astras.push_back(astra_pink);
 }
 
 Cosmos::~Cosmos() {

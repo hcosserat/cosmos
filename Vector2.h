@@ -38,6 +38,10 @@ public:
         return *this;
     }
 
+    Vector2 operator-() const {
+        return Vector2(-x, -x);
+    }
+
     // Scalar multiplication
     Vector2<T> operator*(T scalar) const {
         return Vector2<T>(x * scalar, y * scalar);
