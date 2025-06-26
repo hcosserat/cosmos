@@ -17,7 +17,7 @@ Cosmos::Cosmos(const Vector2<int> windows_size) {
     const auto up_shift = Vector2(0, DM.h / 8);
 
     const std::vector green{0, 255, 0};
-    const std::vector pink{255, 4, 191};
+    const std::vector pink{255, 0, 184};
 
     const auto astra_green = new Astra(
         "Emerald",

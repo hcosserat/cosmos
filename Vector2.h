@@ -65,22 +65,28 @@ public:
     }
 
     // Array-like access (for compatibility with previous code)
-    T operator[](int index) const {
+    T operator[](const int index) const {
         if (index == 0) return x;
         if (index == 1) return y;
         throw std::out_of_range("Vector2 index out of range");
     }
 
-    T &operator[](int index) {
+    T &operator[](const int index) {
         if (index == 0) return x;
         if (index == 1) return y;
         throw std::out_of_range("Vector2 index out of range");
     }
 
-    T dist2(const Vector2<T> *other) const {
-        const T dx = other->x - x;
-        const T dy = other->y - y;
-        return dx * dx + dy * dy;
+    T dot(const Vector2 *other) const {
+        return x * other->x + y * other->y;
+    }
+
+    T norm2() const {
+        return this->dot(this);
+    }
+
+    T dist2(const Vector2 *other) const {
+        return (*this - *other).norm2();
     }
 };
 
