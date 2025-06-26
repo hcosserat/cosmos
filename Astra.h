@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include <vector>
+#include <functional>
 
 #include "Particle.h"
 #include "Vector2.h"
@@ -43,10 +44,6 @@ struct Astra {
 
     void create_new_particles(int count);
 
-    void draw_particles(const Astra *astra_dest) const;
-
-    void draw(const Astra *other) const;
-
     void update(double dt, double p_creation_rate, const Astra *other);
 
     Vector2<double> window_to_screen(const Vector2<double> &window_pos) const;
@@ -57,5 +54,7 @@ struct Astra {
 
     Vector2<double> get_star_screen_position() const;
 };
+
+std::function<SDL_Point(SDL_Point)> SDL_Point_converter(const Astra *src, const Astra *dest);
 
 #endif //WINDOW_H

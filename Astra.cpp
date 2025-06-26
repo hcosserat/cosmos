@@ -35,6 +35,9 @@ Astra::~Astra() {
     for (const auto p: particles) {
         delete p;
     }
+    for (const auto p: core_particles) {
+        delete p;
+    }
 }
 
 Vector2<double> Astra::get_window_position() const {
@@ -71,101 +74,6 @@ void Astra::clear_window() const {
 
 void Astra::render_present() const {
     SDL_RenderPresent(renderer);
-}
-
-void Astra::draw_particles(const Astra *astra_dest) const {
-    const auto dest_renderer = astra_dest->renderer;
-
-    int color_index = 0;
-    const int max_colors = static_cast<int>(particle_colors.size());
-
-    std::vector<SDL_Point> points;
-    points.reserve(std::max(particles.size(), core_particles.size()));
-
-
-    // Particules libres
-    int same_color_particle_count = particles.size() / 6;
-    int same_color_index = same_color_particle_count;
-
-    if (color_index < max_colors) {
-        const auto &particle_color = particle_colors[color_index];
-        SDL_SetRenderDrawColor(dest_renderer, particle_color[0], particle_color[1], particle_color[2], 255);
-    }
-
-    points.clear();
-
-    int i;
-
-    for (i = 0; i < particles.size(); i++) {
-        if (i == same_color_index && color_index < max_colors - 1) {
-            if (!points.empty()) {
-                SDL_RenderDrawPoints(dest_renderer, points.data(), static_cast<int>(points.size()));
-                points.clear();
-            }
-
-            color_index++;
-            const auto &particle_color = particle_colors[color_index];
-            SDL_SetRenderDrawColor(dest_renderer, particle_color[0], particle_color[1], particle_color[2], 255);
-            same_color_index += same_color_particle_count;
-        }
-
-        const auto p = particles[i];
-        const Vector2<int> window_pos = astra_dest->screen_to_window(p->pos);
-        points.push_back({window_pos.x, window_pos.y});
-    }
-
-    if (!points.empty()) {
-        SDL_RenderDrawPoints(dest_renderer, points.data(), static_cast<int>(points.size()));
-        points.clear();
-    }
-
-
-    // Particules centrales
-    same_color_particle_count = core_particles.size() / 4;
-    same_color_index = same_color_particle_count;
-
-    if (color_index < max_colors) {
-        const auto &particle_color = particle_colors[color_index];
-        SDL_SetRenderDrawColor(dest_renderer, particle_color[0], particle_color[1], particle_color[2], 255);
-    }
-
-    for (i = 0; i < core_particles.size(); i++) {
-        if (i == same_color_index && color_index < max_colors - 1) {
-            if (!points.empty()) {
-                SDL_RenderDrawPoints(dest_renderer, points.data(), static_cast<int>(points.size()));
-                points.clear();
-            }
-
-            color_index++;
-            const auto &particle_color = particle_colors[color_index];
-            SDL_SetRenderDrawColor(dest_renderer, particle_color[0], particle_color[1], particle_color[2], 255);
-            same_color_index += same_color_particle_count;
-        }
-
-        const auto p = core_particles[i];
-
-        if (astra_dest == this) {
-            // on dessine nos particules centrales
-            points.push_back({static_cast<int>(p->pos.x), static_cast<int>(p->pos.y)});
-        } else {
-            // l'autre dessine nos particules centrales
-            const auto pos = astra_dest->screen_to_window(window_to_screen(p->pos));
-            points.push_back({pos.x, pos.y});
-        }
-    }
-
-    if (!points.empty()) {
-        SDL_RenderDrawPoints(dest_renderer, points.data(), static_cast<int>(points.size()));
-    }
-}
-
-void Astra::draw(const Astra *other) const {
-    clear_window();
-
-    draw_particles(this); // draw my own particles on my own window
-    other->draw_particles(this); // draw the other's particles on my own window
-
-    render_present();
 }
 
 bool Astra::is_overlapping_with_other_window(const Astra *other) const {
@@ -247,4 +155,12 @@ void Astra::update(const double dt, const double p_creation_rate, const Astra *o
     const int new_particles_count = p_creation_rate * dt;
     create_new_particles(new_particles_count);
     update_particles(dt, other);
+}
+
+std::function<SDL_Point(SDL_Point)> SDL_Point_converter(const Astra *src, const Astra *dest) {
+    return [src, dest](const SDL_Point pt) {
+        const auto screen_pos = src->window_to_screen({static_cast<double>(pt.x), static_cast<double>(pt.y)});
+        const auto new_window_pos = dest->screen_to_window(screen_pos);
+        return SDL_Point{new_window_pos.x, new_window_pos.y};
+    };
 }
