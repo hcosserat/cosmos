@@ -101,10 +101,10 @@ void Particle::update_a_gravity(const Vector2<double> source_pos, const Vector2<
 
 
 void Particle::update_a_gravity_2(const Vector2<double> &source_pos, const Vector2<double> &dest_pos,
-                                   const double dest_m, double lin_factor) {
-    double source_radius = 50; // No acceleration zone around source
-    double dest_radius = 200; // Distance to start wrapping behavior
-    double tunnel_strength = 2.0; // Strength of the tunnel effect
+                                   const double dest_m, const double lin_factor) {
+    const double source_radius = 50; // No acceleration zone around source
+    const double dest_radius = 150; // Distance to start wrapping behavior
+    const double tunnel_strength = lin_factor * 4; // Strength of the tunnel effect
 
     // 1. Near source: zero acceleration
     const auto sp = pos - source_pos;
@@ -141,13 +141,14 @@ void Particle::update_a_gravity_2(const Vector2<double> &source_pos, const Vecto
     // 3. Tunnel effect: force toward the central line
     // Project current position onto the source-destination line
     const auto proj = source_pos + sd_unit * (progress * sd_norm);
-    const auto lateral_offset = pos - proj;
+    const auto lateral_offset = proj - pos;
     const double lateral_dist = sqrt(lateral_offset.norm2());
 
-    // Calculate tunnel force (stronger in the middle of the journey)
-    const double tunnel_profile = 4 * progress * (1 - progress); // Peaks at progress=0.5
-    const auto lateral_dir = lateral_dist > 0 ? lateral_offset / lateral_dist : Vector2<double>(0, 0);
-    const auto f_tunnel = -lateral_dir * tunnel_strength * tunnel_profile * lateral_dist;
+    // Calculate tunnel force
+    constexpr double tunnel_peak = 0.4;
+    const double tunnel_profile = progress / tunnel_peak * (2 - progress / tunnel_peak);
+    const auto lateral_dir = lateral_dist - 30 > 0 ? lateral_offset / lateral_dist : Vector2<double>(0, 0);
+    const auto f_tunnel = lateral_dir * tunnel_strength * tunnel_profile * lateral_dist;
 
     // 4. Destination wrapping behavior
     if (d_norm < dest_radius) {
@@ -164,15 +165,15 @@ void Particle::update_a_gravity_2(const Vector2<double> &source_pos, const Vecto
 
         const auto f_wrap = perp_dir * (wrap_strength * sqrt(f_g.norm2()));
 
-        // Combine with gravitational force
+        // Combine with other forces
         this->a = f_g + f_wrap;
         return;
     }
 
     // Normal case: combine gravitational and tunnel forces
     // Adjust the balance based on progress
-    double tunnel_weight = std::min(std::max(1.0 - 2.0 * fabs(progress - 0.5), 0.2), 1.0);
-    double gravity_weight = 1.0;
+    const double tunnel_weight = std::min(std::max(1.0 - 10.0 * fabs(progress - tunnel_peak) + 3, 0.2), 1.0);
+    constexpr double gravity_weight = 1.0;
 
     this->a = f_tunnel * tunnel_weight + f_g * gravity_weight;
 }

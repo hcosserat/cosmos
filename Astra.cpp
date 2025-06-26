@@ -103,27 +103,32 @@ Particle *Astra::new_particle(const Vector2<double> v, const Vector2<double> a =
 void Astra::update_particles(const double dt, const Astra *other) const {
     const Vector2<double> this_star_screen_pos = get_star_screen_position();
     const auto noise = Vector2(
-        random_double(-ASTRA_RADIUS / 10.0, ASTRA_RADIUS / 10.0),
-        random_double(-ASTRA_RADIUS / 10.0, ASTRA_RADIUS / 10.0)
+        random_double(-ASTRA_RADIUS / 5.0, ASTRA_RADIUS / 5.0),
+        random_double(-ASTRA_RADIUS / 5.0, ASTRA_RADIUS / 5.0)
     );
 
     for (const auto p: particles) {
         if (is_overlapping_with_other_window(other)) {
-            Vector2<double> other_star_screen_pos = other->get_star_screen_position() + noise * 2;
+            Vector2<double> other_star_screen_pos = other->get_star_screen_position() + noise * 4;
 
             if (other_star_screen_pos.dist2(&p->pos) >= ASTRA_RADIUS * ASTRA_RADIUS)
                 p->update_a_gravity_2(this_star_screen_pos, other_star_screen_pos, other->m, 0.5);
             else
                 p->update_a_gravity(other_star_screen_pos, this_star_screen_pos, this->m);
         } else {
-            p->update_a_fall(m * 1.0e-6, this_star_screen_pos);
+            p->update_a_fall(10, this_star_screen_pos);
         }
         p->update(dt);
     }
 
     for (const auto p: core_particles) {
-        p->update_a_fall(m * 1.0e-6, star + noise);
-        p->update(dt * 10.0); // simule des particules plus rapides
+        p->update_a_fall(50, star + noise);
+        p->update(dt * 5.0); // simule des particules plus rapides
+
+        if (p->v.norm2() > 1000) {
+            p->v *= 0.9;
+            p->a *= 0.7;
+        }
     }
 }
 
