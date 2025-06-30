@@ -53,10 +53,7 @@ Vector2<double> Astra::window_to_screen(const Vector2<double> &window_pos) const
 
 Vector2<int> Astra::screen_to_window(const Vector2<double> &screen_pos) const {
     const Vector2<double> window_origin = get_window_position();
-    return {
-        static_cast<int>(screen_pos.x - window_origin.x),
-        static_cast<int>(screen_pos.y - window_origin.y)
-    };
+    return (screen_pos - window_origin).as_int();
 }
 
 Vector2<double> Astra::get_star_screen_position() const {
@@ -164,8 +161,8 @@ void Astra::update(const double dt, const double p_creation_rate, const Astra *o
 
 std::function<SDL_Point(SDL_Point)> SDL_Point_converter(const Astra *src, const Astra *dest) {
     return [src, dest](const SDL_Point pt) {
-        const auto screen_pos = src->window_to_screen({static_cast<double>(pt.x), static_cast<double>(pt.y)});
+        const auto screen_pos = src->window_to_screen(Vector2<double>(pt.x, pt.y));
         const auto new_window_pos = dest->screen_to_window(screen_pos);
-        return SDL_Point{new_window_pos.x, new_window_pos.y};
+        return new_window_pos.as_SDL_Point();
     };
 }

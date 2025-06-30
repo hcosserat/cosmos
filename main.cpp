@@ -13,16 +13,18 @@ int main(int argc, char *argv[]) {
     const auto cosmos = new Cosmos(Vector2(600, 600));
     bool quit = false;
 
-    // Event handler
     SDL_Event e;
 
-    // Main loop
+    bool debug = false;
+
     while (!quit) {
-        // Handle events
         while (SDL_PollEvent(&e) != 0) {
-            // User requests quit
-            if (e.type == SDL_QUIT) {
+            if (e.type == SDL_QUIT
+                || (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_CLOSE)) {
                 quit = true;
+            }
+            if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_d) {
+                debug = !debug;
             }
         }
 

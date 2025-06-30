@@ -101,7 +101,7 @@ void Particle::update_a_gravity(const Vector2<double> source_pos, const Vector2<
 
 
 void Particle::update_a_gravity_2(const Vector2<double> &source_pos, const Vector2<double> &dest_pos,
-                                   const double dest_m, const double lin_factor) {
+                                  const double dest_m, const double lin_factor) {
     const double source_radius = 50; // No acceleration zone around source
     const double dest_radius = 150; // Distance to start wrapping behavior
     const double tunnel_strength = lin_factor * 4; // Strength of the tunnel effect
@@ -147,7 +147,11 @@ void Particle::update_a_gravity_2(const Vector2<double> &source_pos, const Vecto
     // Calculate tunnel force
     constexpr double tunnel_peak = 0.4;
     const double tunnel_profile = progress / tunnel_peak * (2 - progress / tunnel_peak);
-    const auto lateral_dir = lateral_dist - 30 > 0 ? lateral_offset / lateral_dist : Vector2<double>(0, 0);
+    const auto lateral_dir = lateral_dist > 30
+                                 ? lateral_offset / lateral_dist
+                                 : lateral_dist > 0
+                                       ? - lateral_offset / lateral_dist
+                                       : Vector2<double>(0, 0);
     const auto f_tunnel = lateral_dir * tunnel_strength * tunnel_profile * lateral_dist;
 
     // 4. Destination wrapping behavior
@@ -181,11 +185,10 @@ void Particle::update_a_gravity_2(const Vector2<double> &source_pos, const Vecto
 
 void Particle::update_a_fall(double k, const Vector2<double> direction) {
     // â = k * ^d
-    const double dx = direction.x - pos.x;
-    const double dy = direction.y - pos.y;
-    const double d = sqrt(dx * dx + dy * dy);
-    k = d > 10 ? k / d : 0;
+    const auto d = direction - pos;
+    const double d2 = d.norm2();
+    const double d_norm = sqrt(d2);
+    k = d_norm > 10 ? k / d_norm : 0;
 
-    this->a.x = k * dx;
-    this->a.y = k * dy;
+    this->a = k * d;
 }

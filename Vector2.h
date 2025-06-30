@@ -2,6 +2,7 @@
 #define VECTOR2_H
 
 #include <iostream>
+#include <SDL_rect.h>
 
 template<typename T>
 class Vector2 {
@@ -39,7 +40,7 @@ public:
     }
 
     Vector2 operator-() const {
-        return Vector2(-x, -x);
+        return Vector2(-x, -y);
     }
 
     // Scalar multiplication
@@ -87,6 +88,18 @@ public:
 
     T dist2(const Vector2 *other) const {
         return (*this - *other).norm2();
+    }
+
+    Vector2<int> as_int() const {
+        return Vector2<int>(static_cast<int>(x), static_cast<int>(y));
+    }
+
+    Vector2<double> as_double() const {
+        return Vector2<double>(static_cast<double>(x), static_cast<double>(y));
+    }
+
+    SDL_Point as_SDL_Point() const {
+        return SDL_Point(static_cast<int>(x), static_cast<int>(y));
     }
 };
 

@@ -40,7 +40,7 @@ Cosmos::~Cosmos() {
     }
 }
 
-void Cosmos::draw() const {
+void Cosmos::draw(const bool debug) const {
     const Astra *astra1 = astras.front();
     const auto a1_renderer = astra1->renderer;
     const Astra *astra2 = astras.back();
@@ -68,10 +68,10 @@ void Cosmos::draw() const {
     for (i = 0; i < any_astra->particles.size(); i++) {
         auto p = astra1->particles[i];
         auto window_pos = astra1->screen_to_window(p->pos);
-        a1_points_to_draw.push_back({window_pos.x, window_pos.y});
+        a1_points_to_draw.push_back(window_pos.as_SDL_Point());
         p = astra2->particles[i];
         window_pos = astra2->screen_to_window(p->pos);
-        a2_points_to_draw.push_back({window_pos.x, window_pos.y});
+        a2_points_to_draw.push_back(window_pos.as_SDL_Point());
 
         if (i == same_color_index || i == any_astra->particles.size() - 1) {
             particle_color = astra1->particle_colors[color_index];
@@ -111,9 +111,9 @@ void Cosmos::draw() const {
 
     for (i = 0; i < any_astra->core_particles.size(); i++) {
         auto p = astra1->core_particles[i];
-        a1_points_to_draw.push_back({static_cast<int>(p->pos.x), static_cast<int>(p->pos.y)});
+        a1_points_to_draw.push_back(p->pos.as_SDL_Point());
         p = astra2->core_particles[i];
-        a2_points_to_draw.push_back({static_cast<int>(p->pos.x), static_cast<int>(p->pos.y)});
+        a2_points_to_draw.push_back(p->pos.as_SDL_Point());
 
         if (i == same_color_index || i == any_astra->core_particles.size() - 1) {
             particle_color = astra1->particle_colors[color_index];
@@ -146,6 +146,8 @@ void Cosmos::draw() const {
         }
     }
 
+    if (debug) display_mouse_acc();
+
     astra1->render_present();
     astra2->render_present();
 }
@@ -155,4 +157,34 @@ void Cosmos::update(const double dt) const {
     Astra *astra2 = astras.back();
     astra1->update(dt, 500, astra2);
     astra2->update(dt, 500, astra1);
+}
+
+void Cosmos::display_mouse_acc() const {
+    const auto src = astras[0];
+    const auto dest = astras[1];
+
+    int x, y;
+    SDL_GetGlobalMouseState(&x, &y);
+
+    auto mouse = Particle({static_cast<double>(x), static_cast<double>(y)}, {});
+    mouse.spin = 1;
+
+    if (src->is_overlapping_with_other_window(dest)) {
+        if (dest->get_star_screen_position().dist2(&mouse.pos) >= ASTRA_RADIUS * ASTRA_RADIUS)
+            mouse.update_a_gravity_2(src->get_star_screen_position(), dest->get_star_screen_position(), dest->m, 0.5);
+        else
+            mouse.update_a_gravity(src->get_star_screen_position(), dest->get_star_screen_position(), src->m);
+    } else {
+        mouse.update_a_fall(10, src->get_star_screen_position());
+    }
+
+    Vector2<int> pos1, pos2, a1, a2;
+
+    pos1 = src->screen_to_window(mouse.pos);
+    pos2 = dest->screen_to_window(mouse.pos);
+    a1 = pos1 + mouse.a.as_int();
+    a2 = pos2 + mouse.a.as_int();
+
+    SDL_RenderDrawLine(src->renderer, pos1.x, pos1.y, a1.x, a1.y);
+    SDL_RenderDrawLine(dest->renderer, pos2.x, pos2.y, a2.x, a2.y);
 }

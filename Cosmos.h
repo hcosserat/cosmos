@@ -17,9 +17,13 @@ public:
 
     ~Cosmos();
 
-    void draw() const;
+    void draw(bool debug = false) const;
 
     void update(double dt) const;
+
+    void debug() const;
+
+    void display_mouse_acc() const;
 };
 
 #endif //COSMOS_H
