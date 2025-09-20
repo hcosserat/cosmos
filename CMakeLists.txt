@@ -3,7 +3,7 @@ project(cosmos)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(cosmo main.cpp
+add_executable(cosmos main.cpp
         Astra.h
         Cosmos.cpp
         Cosmos.h
@@ -12,18 +12,18 @@ add_executable(cosmo main.cpp
         Particle.h
         random.cpp
         random.h
-        mac_rounded_window.mm
-        mac_rounded_window.h)
+        mac_helpers.mm
+        mac_helpers.h)
 
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 
 if (APPLE)
-    target_sources(cosmo PRIVATE mac_rounded_window.mm)
+    target_sources(cosmos PRIVATE mac_helpers.mm)
     find_library(COCOA_FRAMEWORK Cocoa)
     if (COCOA_FRAMEWORK)
-        target_link_libraries(cosmo PRIVATE ${COCOA_FRAMEWORK} ${SDL2_LIBRARIES})
+        target_link_libraries(cosmos PRIVATE ${COCOA_FRAMEWORK} ${SDL2_LIBRARIES})
     else ()
-        target_link_libraries(cosmo ${SDL2_LIBRARIES})
+        target_link_libraries(cosmos ${SDL2_LIBRARIES})
     endif ()
 endif ()

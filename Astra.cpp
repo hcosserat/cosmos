@@ -2,7 +2,7 @@
 
 #include <iostream>
 #ifdef __APPLE__
-#include "mac_rounded_window.h"
+#include "mac_helpers.h"
 #endif
 
 Astra::Astra(const char *title, const Vector2<int> &pos, const Vector2<int> &size,

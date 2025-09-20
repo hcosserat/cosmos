@@ -1,5 +1,5 @@
 #include <iostream>
-
+#include "mac_helpers.h"
 #include "Cosmos.h"
 
 int main(int argc, char *argv[]) {
@@ -7,6 +7,8 @@ int main(int argc, char *argv[]) {
         std::cerr << "SDL could not initialize >< ! Error : " << SDL_GetError() << std::endl;
         return 1;
     }
+
+    SetupMenu();
 
     constexpr int fps = 30;
     constexpr double dt = 1.0 / fps;
