@@ -26,10 +26,15 @@ int main(int argc, char *argv[]) {
             if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_d) {
                 debug = !debug;
             }
+            if (e.type == SDL_MOUSEBUTTONDOWN
+                || e.type == SDL_MOUSEBUTTONUP
+                || e.type == SDL_MOUSEMOTION) {
+                cosmos->move_windows(e);
+            }
         }
 
         cosmos->update(dt);
-        cosmos->draw();
+        cosmos->draw(debug);
         SDL_Delay(static_cast<Uint32>(1000 * dt));
     }
 

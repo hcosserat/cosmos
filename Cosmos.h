@@ -11,6 +11,9 @@
 
 class Cosmos {
     std::vector<Astra *> astras;
+    bool is_dragging;
+    Astra *dragged_window;
+    Vector2<int> drag_offset;
 
 public:
     explicit Cosmos(Vector2<int> windows_size = Vector2(500, 500));
@@ -21,7 +24,7 @@ public:
 
     void update(double dt) const;
 
-    void debug() const;
+    void move_windows(const SDL_Event &e);
 
     void display_mouse_acc() const;
 };

@@ -32,6 +32,11 @@ Cosmos::Cosmos(const Vector2<int> windows_size) {
 
     astras.push_back(astra_green);
     astras.push_back(astra_pink);
+
+    // Initialize drag state
+    is_dragging = false;
+    dragged_window = nullptr;
+    drag_offset = Vector2(0, 0);
 }
 
 Cosmos::~Cosmos() {
@@ -159,6 +164,55 @@ void Cosmos::update(const double dt) const {
     astra2->update(dt, 500, astra1);
 }
 
+void Cosmos::move_windows(const SDL_Event &e) {
+    switch (e.type) {
+        case SDL_MOUSEBUTTONDOWN:
+            if (e.button.button == SDL_BUTTON_LEFT) {
+                int mouse_x, mouse_y;
+                SDL_GetGlobalMouseState(&mouse_x, &mouse_y);
+
+                // Check which window (if any) contains the mouse
+                for (auto *astra: astras) {
+                    int win_x, win_y, win_w, win_h;
+                    SDL_GetWindowPosition(astra->window, &win_x, &win_y);
+                    SDL_GetWindowSize(astra->window, &win_w, &win_h);
+
+                    if (mouse_x >= win_x && mouse_x < win_x + win_w &&
+                        mouse_y >= win_y && mouse_y < win_y + win_h) {
+                        is_dragging = true;
+                        dragged_window = astra;
+                        drag_offset = Vector2(mouse_x - win_x, mouse_y - win_y);
+                        break;
+                    }
+                }
+            }
+            break;
+
+        case SDL_MOUSEBUTTONUP:
+            if (e.button.button == SDL_BUTTON_LEFT) {
+                is_dragging = false;
+                dragged_window = nullptr;
+            }
+            break;
+
+        case SDL_MOUSEMOTION:
+            if (is_dragging && dragged_window) {
+                int mouse_x, mouse_y;
+                SDL_GetGlobalMouseState(&mouse_x, &mouse_y);
+
+                const int new_x = mouse_x - drag_offset.x;
+                const int new_y = mouse_y - drag_offset.y;
+
+                SDL_SetWindowPosition(dragged_window->window, new_x, new_y);
+            }
+            break;
+
+        default:
+            break;
+    }
+}
+
+
 void Cosmos::display_mouse_acc() const {
     const auto src = astras[0];
     const auto dest = astras[1];
@@ -171,7 +225,8 @@ void Cosmos::display_mouse_acc() const {
 
     if (src->is_overlapping_with_other_window(dest)) {
         if (dest->get_star_screen_position().dist2(&mouse.pos) >= ASTRA_RADIUS * ASTRA_RADIUS)
-            mouse.update_a_gravity_2(src->get_star_screen_position(), dest->get_star_screen_position(), dest->m, 0.5);
+            mouse.update_a_gravity_2(src->get_star_screen_position(), dest->get_star_screen_position(), dest->m,
+                                     0.5);
         else
             mouse.update_a_gravity(src->get_star_screen_position(), dest->get_star_screen_position(), src->m);
     } else {

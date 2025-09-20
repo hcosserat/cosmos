@@ -1,14 +1,20 @@
 #include "Astra.h"
 
 #include <iostream>
+#ifdef __APPLE__
+#include "mac_rounded_window.h"
+#endif
 
 Astra::Astra(const char *title, const Vector2<int> &pos, const Vector2<int> &size,
              const std::vector<int> color) : star(size.x / 2.0, size.y / 2.0), color(color) {
-    window = SDL_CreateWindow(title, pos.x, pos.y, size.x, size.y, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow(title, pos.x, pos.y, size.x, size.y, SDL_WINDOW_SHOWN | SDL_WINDOW_BORDERLESS);
+#ifdef __APPLE__
+    ApplyMacRoundedCorners(window, 16);
+#endif
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     m = ASTRA_MASS;
 
-    constexpr int core_particles_count = 100;
+    constexpr int core_particles_count = 64;
     int i;
 
     for (i = 0; i < core_particles_count; i++) {
@@ -27,6 +33,7 @@ Astra::Astra(const char *title, const Vector2<int> &pos, const Vector2<int> &siz
         particle_colors.push_back(particle_color);
     }
 }
+
 
 Astra::~Astra() {
     SDL_DestroyWindow(window);
