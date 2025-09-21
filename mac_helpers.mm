@@ -24,7 +24,6 @@ void ApplyMacRoundedCorners(SDL_Window* sdlWindow, int radius) {
 extern "C" void SetupMenu() {
     @autoreleasepool {
         NSMenu *mainMenu = [[NSMenu alloc] initWithTitle:@""];
-        // App menu
         NSMenuItem *appMenuItem = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
         [mainMenu addItem:appMenuItem];
         NSMenu *appMenu = [[NSMenu alloc] initWithTitle:@""];
@@ -34,8 +33,6 @@ extern "C" void SetupMenu() {
                     keyEquivalent:@"q"];
 
         [appMenuItem setSubmenu:appMenu];
-
-        // Intentionally do NOT add a "Window" menu.
         [NSApp setMainMenu:mainMenu];
     }
 }

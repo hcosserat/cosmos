@@ -26,7 +26,7 @@ struct Astra {
     std::vector<int> color;
     std::vector<std::vector<int> > particle_colors;
 
-    Astra(const char *title, const Vector2<int> &pos, const Vector2<int> &size, std::vector<int> color);
+    Astra(const char *title, const Vector2<int> &pos, const Vector2<int> &size, const std::vector<int>& color);
 
     ~Astra();
 

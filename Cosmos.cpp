@@ -233,12 +233,10 @@ void Cosmos::display_mouse_acc() const {
         mouse.update_a_fall(10, src->get_star_screen_position());
     }
 
-    Vector2<int> pos1, pos2, a1, a2;
-
-    pos1 = src->screen_to_window(mouse.pos);
-    pos2 = dest->screen_to_window(mouse.pos);
-    a1 = pos1 + mouse.a.as_int();
-    a2 = pos2 + mouse.a.as_int();
+    const Vector2<int> pos1 = src->screen_to_window(mouse.pos);
+    const Vector2<int> pos2 = dest->screen_to_window(mouse.pos);
+    const Vector2<int> a1 = pos1 + mouse.a.as_int();
+    const Vector2<int> a2 = pos2 + mouse.a.as_int();
 
     SDL_RenderDrawLine(src->renderer, pos1.x, pos1.y, a1.x, a1.y);
     SDL_RenderDrawLine(dest->renderer, pos2.x, pos2.y, a2.x, a2.y);

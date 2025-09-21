@@ -18,22 +18,22 @@ public:
     }
 
     // Addition
-    Vector2<T> operator+(const Vector2<T> &other) const {
+    Vector2 operator+(const Vector2<T> &other) const {
         return Vector2<T>(x + other.x, y + other.y);
     }
 
-    Vector2<T> &operator+=(const Vector2<T> &other) {
+    Vector2 &operator+=(const Vector2<T> &other) {
         x += other.x;
         y += other.y;
         return *this;
     }
 
     // Subtraction
-    Vector2<T> operator-(const Vector2<T> &other) const {
+    Vector2 operator-(const Vector2<T> &other) const {
         return Vector2<T>(x - other.x, y - other.y);
     }
 
-    Vector2<T> &operator-=(const Vector2<T> &other) {
+    Vector2 &operator-=(const Vector2<T> &other) {
         x -= other.x;
         y -= other.y;
         return *this;
@@ -44,28 +44,28 @@ public:
     }
 
     // Scalar multiplication
-    Vector2<T> operator*(T scalar) const {
-        return Vector2<T>(x * scalar, y * scalar);
+    Vector2 operator*(T scalar) const {
+        return Vector2(x * scalar, y * scalar);
     }
 
-    Vector2<T> &operator*=(T scalar) {
+    Vector2 &operator*=(T scalar) {
         x *= scalar;
         y *= scalar;
         return *this;
     }
 
     // Division by scalar
-    Vector2<T> operator/(T scalar) const {
-        return Vector2<T>(x / scalar, y / scalar);
+    Vector2 operator/(T scalar) const {
+        return Vector2(x / scalar, y / scalar);
     }
 
-    Vector2<T> &operator/=(T scalar) {
+    Vector2 &operator/=(T scalar) {
         x /= scalar;
         y /= scalar;
         return *this;
     }
 
-    // Array-like access (for compatibility with previous code)
+    // Array-like access
     T operator[](const int index) const {
         if (index == 0) return x;
         if (index == 1) return y;
@@ -91,11 +91,11 @@ public:
     }
 
     Vector2<int> as_int() const {
-        return Vector2<int>(static_cast<int>(x), static_cast<int>(y));
+        return {static_cast<int>(x), static_cast<int>(y)};
     }
 
     Vector2<double> as_double() const {
-        return Vector2<double>(static_cast<double>(x), static_cast<double>(y));
+        return {static_cast<double>(x), static_cast<double>(y)};
     }
 
     SDL_Point as_SDL_Point() const {

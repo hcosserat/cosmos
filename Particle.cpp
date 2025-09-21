@@ -102,8 +102,8 @@ void Particle::update_a_gravity(const Vector2<double> source_pos, const Vector2<
 
 void Particle::update_a_gravity_2(const Vector2<double> &source_pos, const Vector2<double> &dest_pos,
                                   const double dest_m, const double lin_factor) {
-    const double source_radius = 50; // No acceleration zone around source
-    const double dest_radius = 150; // Distance to start wrapping behavior
+    constexpr double source_radius = 50; // No acceleration zone around source
+    constexpr double dest_radius = 150; // Distance to start wrapping behavior
     const double tunnel_strength = lin_factor * 4; // Strength of the tunnel effect
 
     // 1. Near source: zero acceleration

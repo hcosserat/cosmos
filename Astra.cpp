@@ -6,7 +6,7 @@
 #endif
 
 Astra::Astra(const char *title, const Vector2<int> &pos, const Vector2<int> &size,
-             const std::vector<int> color) : star(size.x / 2.0, size.y / 2.0), color(color) {
+             const std::vector<int>& color) : star(size.x / 2.0, size.y / 2.0), color(color) {
     window = SDL_CreateWindow(title, pos.x, pos.y, size.x, size.y, SDL_WINDOW_SHOWN | SDL_WINDOW_BORDERLESS);
 #ifdef __APPLE__
     ApplyMacRoundedCorners(window, 16);
